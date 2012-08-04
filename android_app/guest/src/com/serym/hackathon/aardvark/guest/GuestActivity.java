@@ -29,7 +29,7 @@ public class GuestActivity extends Activity {
 	/**
 	 * Sender ID for Google Cloud Messaging (GCM).
 	 */
-	private static final String SENDER_ID = "0";
+	private static final String SENDER_ID = "159055884591";
 
 	/**
 	 * Tag for LogCat.
