@@ -94,7 +94,6 @@
 				$db->close();
 			}
 			else {
-				$_SESSION['form_error'] = 'unknown_error';
 				return FALSE;
 			}
 		}

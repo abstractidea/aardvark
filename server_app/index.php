@@ -19,7 +19,11 @@
 				$token = $model->gen_token(TOKEN_LENGTH);
 				$result = $session->register($_REQUEST['username'], $_REQUEST['password'], $token);
 
-				header('refresh:0;url="'.WEB_ROOT.'"');
+				if ( $result == FALSE ) {
+					header('refresh:0;url="'.WEB_ROOT.'signup"');
+				} else {
+					header('refresh:0;url="'.WEB_ROOT.'"');
+				}
 			}
 			else {
 				loadView('signup');
