@@ -3,6 +3,7 @@ package com.serym.hackathon.aardvark.bouncer;
 import com.google.zxing.client.android.Intents;
 
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,7 +15,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class BouncerActivity extends Activity {
 
@@ -28,14 +29,20 @@ public class BouncerActivity extends Activity {
 	 */
 	private static final String TAG = "AARDVARK-BOUNCER";
 
+	private TextView statusTextView = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_bouncer);
 
+		statusTextView = (TextView) findViewById(R.id.statusTextView);
+
 		Button scanButton = (Button) findViewById(R.id.scanButton);
+		Button testRequestButton = (Button) findViewById(R.id.testRequestButton);
 
 		scanButton.setOnClickListener(scanButtonListener);
+		testRequestButton.setOnClickListener(testRequestButtonListener);
 	}
 
 	@Override
@@ -48,9 +55,13 @@ public class BouncerActivity extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		if (resultCode == Activity.RESULT_OK && requestCode == SCAN_REQUESTCODE) {
 			String result = intent.getStringExtra(Intents.Scan.RESULT);
-			Log.i(TAG, "Read QR result: " + result);
-			Toast.makeText(this.getApplicationContext(), result,
-					Toast.LENGTH_LONG).show();
+
+			Log.d(TAG, "Read QR result: " + result);
+
+			// Toast.makeText(this.getApplicationContext(), result,
+			// Toast.LENGTH_LONG).show();
+
+			statusTextView.setText(result);
 		}
 	}
 
@@ -74,6 +85,17 @@ public class BouncerActivity extends Activity {
 			} catch (ActivityNotFoundException e) {
 				BouncerActivity.this.showDownloadDialog();
 			}
+		}
+	};
+
+	private OnClickListener testRequestButtonListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			final CheckinRequest request = new CheckinRequest("bouncer123",
+					"deviceReg456", "event84234234", "uid82323-02323",
+					"YOSHI YOSHI YOSHI", "MACCu90aussadasdsds adasdjasd");
+
+			(new SendCheckinRequestTask()).execute(request);
 		}
 	};
 
@@ -101,11 +123,38 @@ public class BouncerActivity extends Activity {
 				});
 		downloadDialog.setNegativeButton("No",
 				new DialogInterface.OnClickListener() {
-					// @Override
+					@Override
 					public void onClick(DialogInterface dialogInterface, int i) {
 					}
 				});
 		return downloadDialog.show();
+	}
+
+	private class SendCheckinRequestTask extends
+			AsyncTask<CheckinRequest, Object, CheckinResponse> {
+		private Exception executeException = null;
+
+		@Override
+		protected CheckinResponse doInBackground(CheckinRequest... requests) {
+			CheckinResponse response = null;
+			try {
+				requests[0].send();
+			} catch (CheckinException e) {
+				executeException = e;
+			}
+			return response;
+		}
+
+		@Override
+		protected void onPostExecute(CheckinResponse response) {
+			if (this.executeException == null) {
+				statusTextView.setText(response.getMessage());
+			} else {
+				this.executeException.printStackTrace(); // DEBUG
+				Log.e(TAG, "Check-in exception", this.executeException);
+				statusTextView.setText(this.executeException.getMessage());
+			}
+		}
 	}
 
 }

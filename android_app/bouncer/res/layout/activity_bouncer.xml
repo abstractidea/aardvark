@@ -4,10 +4,11 @@
     android:layout_height="match_parent" >
 
     <TextView
+        android:id="@+id/statusTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:text="@string/hello_world"
+        android:layout_alignParentBottom="true"
         tools:context=".BouncerActivity" />
 
     <LinearLayout
@@ -22,6 +23,12 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/scan_btn" />
+
+        <Button
+            android:id="@+id/testRequestButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/test_request_btn" />
     </LinearLayout>
 
 </RelativeLayout>
