@@ -2,7 +2,5 @@
 	"bouncer_id":"12345678",
 	"device_registration_id":"12345678",
 	"event_id":"12345678",
-	"mac_server":"12345678",
-	"mac_client":"12345678",
-	"user_id":"12345678"
+	"token":"a1d55fd74153f0be0e873772b7673563"
 }

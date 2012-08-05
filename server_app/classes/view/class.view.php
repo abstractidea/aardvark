@@ -23,9 +23,10 @@
 							<div id="nav">
 								<ul id="navigation">
 									<li><a href="'.WEB_ROOT.'">Home</a></li>
+									<li><a href="'.WEB_ROOT.'#">Events</a></li>
 									<li><a href="'.WEB_ROOT.'#">Nothing</a></li>
-									<li><a href="'.WEB_ROOT.'#">Nothing</a></li>
-									<li><a href="'.WEB_ROOT.'#">Nothing</a></li>
+								</ul>
+								<ul id="settings">
 									'.loadSettings().'
 								</ul>
 							</div>

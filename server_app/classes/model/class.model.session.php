@@ -20,10 +20,12 @@
 					continue;
 				}
 				else {
+					$_SESSION['form_error'] = 'username_characters';
 					return FALSE;
 				}
 			}
 			if ((strstr($username, '__'))||(strstr($username, '--'))||(strstr($username, '_-'))||(strstr($username, '-_'))) {
+				$_SESSION['form_error'] = 'username_characters';
 				return FALSE;
 			}
 			else {
@@ -33,6 +35,7 @@
 		public function password_verify($password=FALSE) {
 			if ($password==NULL) {
 				log("NULL Password Received: ".$password);
+				$_SESSION['form_error'] = 'password_characters';
 
 				return FALSE;
 			}
@@ -42,6 +45,7 @@
 						continue;
 					}
 					else {
+						$_SESSION['form_error'] = 'password_characters';
 						return FALSE;
 					}
 				}
@@ -49,6 +53,7 @@
 				return TRUE;
 			}
 			else {
+				$_SESSION['form_error'] = 'password_length';
 				return FALSE;
 			}
 			
@@ -61,6 +66,35 @@
 				return $pass_salted;
 			}
 			else {
+				return FALSE;
+			}
+		}
+		public function register($username='', $password_orig='', $token='') {
+			$password = $this->password_set($password_orig);
+
+			if (($this->username_verify($username))&&($password)) {
+				$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB);
+
+				$query = "SELECT * FROM ".DB_TABLE_USERS." WHERE username='$username' LIMIT 1";
+				$queryResult = $db->query($query);
+				$object = $queryResult->fetch_object();
+				$queryResult->close();
+
+				if ($username==$object->username) {
+					$_SESSION['form_error'] = 'username_taken';
+					return FALSE;
+				}
+				else {
+					$query = "INSERT INTO ".DB_TABLE_USERS." (username, password, roleID) VALUES ('$username', '$password', '30')";
+					$db->query($query);
+
+					$this->authenticate($username, $password_orig);
+				}
+
+				$db->close();
+			}
+			else {
+				$_SESSION['form_error'] = 'unknown_error';
 				return FALSE;
 			}
 		}

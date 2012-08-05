@@ -40,6 +40,7 @@
 		}
 		else {
 			return '
+				<li><a href="'.WEB_ROOT.'signup">Signup</a></li>
 				<li><a href="'.WEB_ROOT.'login">Login</a></li>
 			';
 		}
