@@ -49,6 +49,7 @@
 
         <service android:name=".GCMIntentService" />
         <activity android:enabled="true" android:name="CheckAuthorizationActivity"></activity>
+        <activity android:name="LoginActivity"></activity>
     </application>
 
 </manifest>
