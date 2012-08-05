@@ -10,7 +10,7 @@ import android.util.Log;
 
 /**
  * BarcodeAppDownloadDialog is an AlertDialog that invites the user to download
- * the Barcode Scanner app. The code was adapated from the
+ * the Barcode Scanner app. The code was adapted from the
  * com.google.zxing.integration.android.IntentIntegrator class.
  * 
  * @see http://code.google.com/p/zxing/
