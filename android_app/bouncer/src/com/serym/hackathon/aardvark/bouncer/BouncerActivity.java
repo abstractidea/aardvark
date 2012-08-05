@@ -197,14 +197,16 @@ public class BouncerActivity extends Activity {
 		@Override
 		protected void onPostExecute(CheckinResponse response) {
 			if (this.executeException == null) {
-				statusTextView.setText("Got response:" + "\nCode: "
-						+ response.getResponseCode().toString() + "\nName: "
-						+ response.getUserName());
-
 				if (response.getResponseCode() == CheckinResponseCode.APPROVED) {
 					SoundManager.playSound(SoundType.ACCEPT);
+
+					statusTextView.setText(getString(R.string.checkin_accepted)
+							+ " " + response.getUserName());
 				} else {
 					SoundManager.playSound(SoundType.REJECT);
+
+					statusTextView
+							.setText(getString(R.string.checkin_rejected));
 				}
 			} else {
 				this.executeException.printStackTrace();
