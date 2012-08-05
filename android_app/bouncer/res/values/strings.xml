@@ -10,5 +10,9 @@
     <string name="test_request_btn">Send Test Request</string>
 
     <string name="scan_prompt_msg">Scan a Guest Code</string>
+    
+    <string name="invalid_guest_code">Invalid guest code.\nPlease try scanning again.</string>
+    <string name="checkin_accepted">Check-in accepted!\nUser:</string>
+    <string name="checkin_rejected">Check-in rejected.</string>
 
 </resources>

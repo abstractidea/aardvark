@@ -2,6 +2,8 @@ package com.serym.hackathon.aardvark.bouncer;
 
 import com.google.zxing.client.android.Intents;
 import com.serym.hackathon.aardvark.BarcodeAppDownloadDialog;
+import com.serym.hackathon.aardvark.SoundManager;
+import com.serym.hackathon.aardvark.SoundType;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,6 +23,15 @@ import android.widget.TextView;
  * allows bouncers to scan guest codes.
  */
 public class BouncerActivity extends Activity {
+
+	// TODO
+	private static final String TEMP_BOUNCER_ID = "12345678";
+
+	// TODO
+	private static final String TEMP_EVENT_ID = "12345678";
+
+	// TODO
+	private static final String TEST_QRCODE = "AARDVARKa1d55fd74153f0be0e873772b7673563APA91bGO8G-mf9GJB98xXBM4bvLe-adSn7vyy-l_CAyWIXhTo52x8zEUHOQmg7R2lCY015rg8a6QakNsjkGUTjDweJYnnxs584irTpwTxZPoCZ1z6rWW8hMis_-By9h2qS5s5mjVLlQTRmd7yGg2wvrYEEm_FqPFv3dQb-YK4-W4qLGxcrG3bW0";
 
 	/**
 	 * Tag for LogCat.
@@ -54,6 +65,9 @@ public class BouncerActivity extends Activity {
 		statusTextView = (TextView) findViewById(R.id.statusTextView);
 		Button scanButton = (Button) findViewById(R.id.scanButton);
 		Button testRequestButton = (Button) findViewById(R.id.testRequestButton);
+
+		// Initialize sound manager
+		SoundManager.setContext(this);
 
 		// Setup listeners
 		scanButton.setOnClickListener(new ScanButtonListener());
@@ -98,8 +112,17 @@ public class BouncerActivity extends Activity {
 
 			Log.d(TAG, "Guest code contents: " + result);
 
-			// TODO For now, simply display the result
-			statusTextView.setText(result);
+			CheckinRequest request = null;
+			try {
+				request = CheckinRequest.createFromCode(result,
+						TEMP_BOUNCER_ID, TEMP_EVENT_ID);
+			} catch (CheckinException e) {
+				statusTextView.setText(R.string.invalid_guest_code);
+			}
+
+			if (request != null) {
+				(new SendCheckinRequestTask()).execute(request);
+			}
 		}
 	}
 
@@ -135,11 +158,17 @@ public class BouncerActivity extends Activity {
 	private class TestRequestButtonListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
-			final CheckinRequest request = new CheckinRequest("bouncer123",
-					"deviceReg456", "event84234234", "uid82323-02323",
-					"YOSHI YOSHI YOSHI", "MACCu90aussadasdsds adasdjasd");
+			CheckinRequest request = null;
+			try {
+				request = CheckinRequest.createFromCode(TEST_QRCODE,
+						TEMP_BOUNCER_ID, TEMP_EVENT_ID);
+			} catch (CheckinException e) {
+				statusTextView.setText(R.string.invalid_guest_code);
+			}
 
-			(new SendCheckinRequestTask()).execute(request);
+			if (request != null) {
+				(new SendCheckinRequestTask()).execute(request);
+			}
 		}
 	};
 
@@ -158,7 +187,7 @@ public class BouncerActivity extends Activity {
 		protected CheckinResponse doInBackground(CheckinRequest... requests) {
 			CheckinResponse response = null;
 			try {
-				requests[0].send();
+				response = requests[0].send();
 			} catch (CheckinException e) {
 				executeException = e;
 			}
@@ -168,9 +197,19 @@ public class BouncerActivity extends Activity {
 		@Override
 		protected void onPostExecute(CheckinResponse response) {
 			if (this.executeException == null) {
-				statusTextView.setText(response.getMessage());
+				if (response.getResponseCode() == CheckinResponseCode.APPROVED) {
+					SoundManager.playSound(SoundType.ACCEPT);
+
+					statusTextView.setText(getString(R.string.checkin_accepted)
+							+ " " + response.getUserName());
+				} else {
+					SoundManager.playSound(SoundType.REJECT);
+
+					statusTextView
+							.setText(getString(R.string.checkin_rejected));
+				}
 			} else {
-				this.executeException.printStackTrace(); // DEBUG
+				this.executeException.printStackTrace();
 				Log.e(TAG, "Check-in exception", this.executeException);
 				statusTextView.setText(this.executeException.getMessage());
 			}

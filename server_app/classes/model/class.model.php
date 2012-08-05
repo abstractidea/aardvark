@@ -1,6 +1,6 @@
 <?php
 	class model {
-		private function gen_filename($length=16) {
+		public function gen_token($length=16) {
 			$char = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';    
 			$string = '';
 
@@ -10,37 +10,31 @@
 
 			return $string;
 		}
-		private function parse_json($file='') {
-			if ($file=='') {
+		private function parse_json($data='') {
+			if ($data=='') {
 				return FALSE;
 			}
 			else {
-				$file_contents = file_get_contents(ROOT.'resources/json/'.$file);
-				$jsonArray = json_decode($file_contents);
+				$jsonArray = json_decode($data);
 
 				return $jsonArray;
 			}
 		}
-		public function store_json() {
+		public function collect_json() {
 			$contents = file_get_contents('php://input');
-			$filename = $this->gen_filename().'.json';
-
-			while (file_exists($filename)) {
-				$filename = $this->gen_filename().'.json';
-			}
-
-			$file = fopen(ROOT.'resources/json/'.$filename, "c");
-			fwrite($file, $contents);
-			fclose($file);
+			$json = $this->parse_json($contents);
+			
+			return $json;
 		}
-		public function send_gcm_message($client_id='') {
-			$message = 'This is a test message for GCM.';
-
+		public function send_gcm_message($request='') {
+			$client_id = $request['device_id'];
+			$authorization = $request['authorized'];
 			$communication_fields = array(
 				'registration_ids' => array($client_id),
 				'data' => array(
 					'device_registration_id'=>$client_id,
-					'user_id'=>'temp_user_id_0123'
+					'user_id'=>'temp_user_id_0123',
+					'authorization'=>$authorization
 				)
 			);
 			$headers = array(
@@ -57,8 +51,46 @@
 
 			$result = curl_exec($curl);
 			curl_close($curl);
+		}
+		public function authenticate_client($client_info='') {
+			$token = $client_info->token;
+			$event_whitelist = array();
 
-			die($result);
+			$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB);
+			$query = "SELECT * FROM users_information WHERE token='$token' LIMIT 1";
+			$result = $db->query($query);
+			$username = $result->fetch_object();
+			$username = $username->username;
+			$result->close();
+
+			$query = "SELECT * FROM whitelist WHERE event_id='$client_info->event_id'";
+			$result = $db->query($query);
+
+			while ($row = $result->fetch_object()) {
+				$event_whitelist[] = $row->username;
+			}
+			$result->close();
+			$db->close();
+			
+			if (in_array($username, $event_whitelist)) {
+				return $username;
+			}
+			else {
+				return FALSE;
+			}
+		}
+		private function dbEncode($input='') {
+			$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB);
+			$input = htmlspecialchars($input);
+			$input = $db->real_escape_string($input);
+			$db->close();
+
+			return $input;
+		}
+		private function dbDecode($input='') {
+			$input = stripslashes($input);
+
+			return $input;
 		}
 	}
 ?>

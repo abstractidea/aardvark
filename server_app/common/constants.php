@@ -20,9 +20,10 @@
 	define('DB_PASS', 'KFc;KWE4{nN[');
 	define('DB_TABLE_USERS', 'users');
 	define('DB_TABLE_USERS_ROLES', 'users_roles');
+	define('TOKEN_LENGTH', 32);
 
 	// GCM Defaults
-	define('GCM_API_KEY', 'AIzaSyApls9pNoaXd_bQ27O1jf3zH6HQ8dttWFw');
+	define('GCM_API_KEY', 'AIzaSyBZYkqjQS-E717KBl5NFYbXb6g9YZI7kdk');
 	define('GCM_SEND_URL', 'https://android.googleapis.com/gcm/send');
 
 	// PHP Settings
