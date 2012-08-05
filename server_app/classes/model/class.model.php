@@ -37,8 +37,11 @@
 			$message = 'This is a test message for GCM.';
 
 			$communication_fields = array(
-				'device_registration_id'=>$client_id,
-				'user_id'=>'temp_user_id_0123'
+				'registration_ids' => array($client_id),
+				'data' => array(
+					'device_registration_id'=>$client_id,
+					'user_id'=>'temp_user_id_0123'
+				)
 			);
 			$headers = array(
 				'Authorization: key='.GCM_API_KEY,

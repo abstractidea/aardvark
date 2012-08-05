@@ -17,6 +17,8 @@
 					<body>
 						<div id="wrapper">
 							<div id="header">
+								<h2 id="pageTitle">Project Aardvark</h2>
+								<div id="logo"></div>
 							</div>
 							<div id="nav">
 								<ul id="navigation">
@@ -39,6 +41,8 @@
 							<div id="footer">
 								<span>Copyright &copy; 2002 - '.date('Y').' Team of Project Aardvark</span>
 							</div>
+						</div>
+						<div id="shield">
 						</div>
 					</body>
 				</html>

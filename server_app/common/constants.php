@@ -22,7 +22,7 @@
 	define('DB_TABLE_USERS_ROLES', 'users_roles');
 
 	// GCM Defaults
-	define('GCM_API_KEY', '');
+	define('GCM_API_KEY', 'AIzaSyApls9pNoaXd_bQ27O1jf3zH6HQ8dttWFw');
 	define('GCM_SEND_URL', 'https://android.googleapis.com/gcm/send');
 
 	// PHP Settings
