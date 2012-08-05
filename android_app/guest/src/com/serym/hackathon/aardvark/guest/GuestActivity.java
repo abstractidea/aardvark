@@ -17,14 +17,8 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class GuestActivity extends Activity {
-
-	/**
-	 * Request code for Barcode Scanner scan intent.
-	 */
-	private static final int SCAN_REQUESTCODE = 0x478;
 
 	/**
 	 * Sender ID for Google Cloud Messaging (GCM).
@@ -60,16 +54,6 @@ public class GuestActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_guest, menu);
 		return true;
-	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		if (resultCode == Activity.RESULT_OK && requestCode == SCAN_REQUESTCODE) {
-			String result = intent.getStringExtra(Intents.Scan.RESULT);
-			Log.i(TAG, "Read QR result: " + result);
-			Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG)
-					.show();
-		}
 	}
 
 	private OnClickListener generateButtonListener = new OnClickListener() {
