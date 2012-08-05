@@ -99,7 +99,7 @@ public class GuestActivity extends Activity {
 			intent.putExtra(Intents.Encode.TYPE, Contents.Type.TEXT);
 			intent.putExtra(
 					Intents.Encode.DATA,
-					TEMP_TOKEN+regId);
+					AARDVARK_PREFIX+TEMP_TOKEN+regId);
 
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
