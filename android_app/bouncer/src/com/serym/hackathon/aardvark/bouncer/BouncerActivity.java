@@ -12,7 +12,6 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -20,13 +19,14 @@ import android.widget.Button;
 import android.widget.TextView;
 
 /**
- * BouncerActivity is the primary activity for the Aardvark Bouncer app. It
- * allows bouncers to scan guest codes.
+ * BouncerActivity is where bouncers can scan guest codes.
  */
 public class BouncerActivity extends Activity {
 
-	// TODO
-	private static final String TEMP_BOUNCER_ID = "12345678";
+	/**
+	 * The name of the extra field for the token.
+	 */
+	public static final String INTENT_EXTRA_TOKEN = "token";
 
 	// TODO
 	private static final String TEMP_EVENT_ID = "12345678";
@@ -55,9 +55,23 @@ public class BouncerActivity extends Activity {
 	 */
 	private TextView statusTextView = null;
 
+	/**
+	 * The token for this bouncer.
+	 */
+	private String bouncerToken;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// Get the bouncer token
+		Intent originIntent = getIntent();
+		if (originIntent == null || !originIntent.hasExtra(INTENT_EXTRA_TOKEN)) {
+			throw new IllegalStateException(
+					"Activity must be started with extra: "
+							+ INTENT_EXTRA_TOKEN);
+		}
+		bouncerToken = originIntent.getExtras().getString(INTENT_EXTRA_TOKEN);
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_bouncer);
@@ -95,13 +109,6 @@ public class BouncerActivity extends Activity {
 		}
 	}
 
-	// XXX This was auto-generated. Do we need it?
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_bouncer, menu);
-		return true;
-	}
-
 	/**
 	 * Handles the Barcode Scanner scan intent result.
 	 */
@@ -115,10 +122,10 @@ public class BouncerActivity extends Activity {
 
 			CheckinRequest request = null;
 			try {
-				request = CheckinRequest.createFromCode(result,
-						TEMP_BOUNCER_ID, TEMP_EVENT_ID);
+				request = CheckinRequest.createFromCode(result, bouncerToken,
+						TEMP_EVENT_ID);
 			} catch (IllegalArgumentException e) {
-				statusTextView.setText(R.string.invalid_guest_code);
+				statusTextView.setText(R.string.invalid_guest_code_msg);
 			}
 
 			if (request != null) {
@@ -162,9 +169,9 @@ public class BouncerActivity extends Activity {
 			CheckinRequest request = null;
 			try {
 				request = CheckinRequest.createFromCode(TEST_QRCODE,
-						TEMP_BOUNCER_ID, TEMP_EVENT_ID);
+						bouncerToken, TEMP_EVENT_ID);
 			} catch (IllegalArgumentException e) {
-				statusTextView.setText(R.string.invalid_guest_code);
+				statusTextView.setText(R.string.invalid_guest_code_msg);
 			}
 
 			if (request != null) {
@@ -201,13 +208,14 @@ public class BouncerActivity extends Activity {
 				if (response.getResponseCode() == CheckinResponseCode.APPROVED) {
 					SoundManager.playSound(SoundType.ACCEPT);
 
-					statusTextView.setText(getString(R.string.checkin_accepted)
-							+ " " + response.getUserName());
+					statusTextView
+							.setText(getString(R.string.checkin_accepted_msg)
+									+ " " + response.getUserName());
 				} else {
 					SoundManager.playSound(SoundType.REJECT);
 
 					statusTextView
-							.setText(getString(R.string.checkin_rejected));
+							.setText(getString(R.string.checkin_rejected_msg));
 				}
 			} else {
 				this.executeException.printStackTrace();

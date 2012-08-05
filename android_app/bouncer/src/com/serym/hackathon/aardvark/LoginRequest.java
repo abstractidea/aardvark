@@ -20,7 +20,7 @@ public class LoginRequest {
 	/**
 	 * URI for login request.
 	 */
-	private static final String REQUEST_URI = "http://hackathon.serym.com/login";
+	private static final String REQUEST_URI = "http://hackathon.serym.com/applogin";
 
 	/**
 	 * Name of JSON request user name field.
