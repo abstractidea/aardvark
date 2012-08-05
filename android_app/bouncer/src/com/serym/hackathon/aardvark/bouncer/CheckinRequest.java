@@ -1,14 +1,12 @@
 package com.serym.hackathon.aardvark.bouncer;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -31,19 +29,14 @@ public class CheckinRequest {
 	private static final String CHECKIN_REQUEST_URI = "http://hackathon.serym.com/?checkin";
 
 	/**
+	 * HTTP response code OK.
+	 */
+	private static final int HTTP_STATUS_OK = 200;
+
+	/**
 	 * Mimetype for JSON messages.
 	 */
 	private static final String MIMETYPE_JSON = "application/json";
-
-	/**
-	 * HTTP Accept header field name.
-	 */
-	private static final String HEADER_ACCEPT = "Accept";
-
-	/**
-	 * HTTP Content-type field name.
-	 */
-	private static final String HEADER_CONTENT_TYPE = "Content-type";
 
 	/**
 	 * Encoding used for request message.
@@ -145,47 +138,50 @@ public class CheckinRequest {
 
 		Log.d(TAG, "Request body: " + strRequest);
 
-		// Prepare request
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-
-		HttpPost httpPost = new HttpPost(CHECKIN_REQUEST_URI);
-		httpPost.setHeader(HEADER_ACCEPT, MIMETYPE_JSON);
-		httpPost.setHeader(HEADER_CONTENT_TYPE, MIMETYPE_JSON);
-
-		HttpEntity requestEntity = null;
+		URL url;
 		try {
-			requestEntity = new StringEntity(strRequest, REQUEST_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			// Wrap exception
-			throw new CheckinException("Unsupported encoding in request", e);
-		}
-		httpPost.setEntity(requestEntity);
-
-		// Send request
-		HttpResponse httpResponse = null;
-		try {
-			httpResponse = httpClient.execute(httpPost);
-		} catch (ClientProtocolException e) {
-			// Wrap exception
-			throw new CheckinException("HTTP client protocol error in request",
-					e);
-		} catch (IOException e) {
-			// Wrap exception
-			throw new CheckinException("I/O error during request", e);
+			url = new URL(CHECKIN_REQUEST_URI);
+		} catch (MalformedURLException e) {
+			throw new CheckinException("Invalid URL: " + CHECKIN_REQUEST_URI, e);
 		}
 
-		// Read response
-		HttpEntity responseEntity = httpResponse.getEntity();
-		int responseLen = (responseEntity.getContentLength() < Integer.MAX_VALUE) ? (int) responseEntity
-				.getContentLength() : Integer.MAX_VALUE;
-		byte[] responseBytes = new byte[responseLen];
+		byte[] requestBytes = strRequest.getBytes();
+		byte[] responseBytes = null;
+		HttpURLConnection conn = null;
+
 		try {
-			responseEntity.getContent().read(responseBytes, 0, responseLen);
-			responseEntity.consumeContent();
-		} catch (IOException e) {
-			// Wrap exception
-			throw new CheckinException("I/O error reading response", e);
+			// Prepare request
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setDoOutput(true);
+			conn.setUseCaches(false);
+			conn.setFixedLengthStreamingMode(requestBytes.length);
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", MIMETYPE_JSON + ";charset="
+					+ REQUEST_ENCODING);
+
+			// Post the request
+			OutputStream out = conn.getOutputStream();
+			out.write(requestBytes);
+			out.close();
+
+			// Check the response code
+			int status = conn.getResponseCode();
+			if (status != HTTP_STATUS_OK) {
+				throw new IOException("POST failed with error code " + status);
+			}
+
+			InputStream responseStream = conn.getInputStream();
+			responseBytes = new byte[conn.getContentLength()];
+			responseStream.read(responseBytes, 0, conn.getContentLength());
+			responseStream.close();
+		} catch (Exception e) {
+			throw new CheckinException("Error sending request", e);
+		} finally {
+			if (conn != null) {
+				conn.disconnect();
+			}
 		}
+
 		String strResponse = new String(responseBytes);
 
 		Log.d(TAG, "Response body: " + strResponse);
@@ -209,4 +205,5 @@ public class CheckinRequest {
 
 		return response;
 	}
+
 }
