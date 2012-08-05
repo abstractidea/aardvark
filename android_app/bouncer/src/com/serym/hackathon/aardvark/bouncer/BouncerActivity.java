@@ -116,7 +116,7 @@ public class BouncerActivity extends Activity {
 			try {
 				request = CheckinRequest.createFromCode(result,
 						TEMP_BOUNCER_ID, TEMP_EVENT_ID);
-			} catch (CheckinException e) {
+			} catch (IllegalArgumentException e) {
 				statusTextView.setText(R.string.invalid_guest_code);
 			}
 
@@ -162,7 +162,7 @@ public class BouncerActivity extends Activity {
 			try {
 				request = CheckinRequest.createFromCode(TEST_QRCODE,
 						TEMP_BOUNCER_ID, TEMP_EVENT_ID);
-			} catch (CheckinException e) {
+			} catch (IllegalArgumentException e) {
 				statusTextView.setText(R.string.invalid_guest_code);
 			}
 
@@ -188,7 +188,7 @@ public class BouncerActivity extends Activity {
 			CheckinResponse response = null;
 			try {
 				response = requests[0].send();
-			} catch (CheckinException e) {
+			} catch (ServerRequestException e) {
 				executeException = e;
 			}
 			return response;

@@ -1,17 +1,11 @@
 package com.serym.hackathon.aardvark.bouncer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-
-import android.util.Log;
 
 /**
  * CheckinRequest represents a check-in request to be sent to the server.
@@ -26,32 +20,7 @@ public class CheckinRequest {
 	/**
 	 * URI for check-in request.
 	 */
-	private static final String CHECKIN_REQUEST_URI = "http://hackathon.serym.com/checkin";
-
-	/**
-	 * HTTP response code OK.
-	 */
-	private static final int HTTP_STATUS_OK = 200;
-
-	/**
-	 * Mimetype for JSON messages.
-	 */
-	private static final String MIMETYPE_JSON = "application/json";
-
-	/**
-	 * The content encoding used for request message.
-	 */
-	private static final String REQUEST_ENCODING = "UTF-8";
-
-	/**
-	 * The content length to assume if not specified in the response.
-	 */
-	private static final int DEFAULT_CONTENT_LENGTH = 1024;
-
-	/**
-	 * The content encoding used to read the response message.
-	 */
-	private static final String RESPONSE_ENCODING = "UTF-8";
+	private static final String REQUEST_URI = "http://hackathon.serym.com/checkin";
 
 	/**
 	 * Name of JSON request token field.
@@ -97,7 +66,7 @@ public class CheckinRequest {
 	 * Minimum length of a valid guest code.
 	 */
 	private static final int GUEST_CODE_MINLEN = GUEST_CODE_PREFIX.length()
-			+ GUEST_CODE_TOKENLEN + 1;
+			+ GUEST_CODE_TOKENLEN;
 
 	/**
 	 * The token for this request.
@@ -121,24 +90,24 @@ public class CheckinRequest {
 
 	/**
 	 * Parses a guest code and creates a corresponding CheckinRequest. If the
-	 * guest code is invalid, a CheckinException will be thrown.
+	 * guest code is invalid, an IllegalArgumentException will be thrown.
 	 * 
 	 * @param qrCode
-	 *            contents of the guest QR code
+	 *            the contents of the guest QR code
 	 * @param bouncerId
 	 *            the bouncer id
 	 * @param eventId
 	 *            the event id
 	 * @return a corresponding CheckinRequest
-	 * @throws CheckinException
+	 * @throws IllegalArgumentException
 	 *             if the guest code is invalid
 	 */
 	public static CheckinRequest createFromCode(String qrCode,
-			String bouncerId, String eventId) throws CheckinException {
+			String bouncerId, String eventId) throws IllegalArgumentException {
 
 		if (qrCode == null || !qrCode.startsWith(GUEST_CODE_PREFIX)
 				|| qrCode.length() < GUEST_CODE_MINLEN) {
-			throw new CheckinException("Invalid guest code: " + qrCode);
+			throw new IllegalArgumentException("Invalid guest code: " + qrCode);
 		}
 
 		String token = qrCode.substring(GUEST_CODE_PREFIX.length(),
@@ -154,21 +123,19 @@ public class CheckinRequest {
 	 * Creates a request with the given fields.
 	 * 
 	 * @param token
-	 *            token
+	 *            the token
 	 * @param deviceRegId
-	 *            device registration id
+	 *            the device registration id
 	 * @param bouncerId
-	 *            bouncer id
-	 * 
+	 *            the bouncer id
 	 * @param eventId
-	 *            event id
+	 *            the event id
 	 */
 	public CheckinRequest(String token, String deviceRegId, String bouncerId,
 			String eventId) {
 		this.token = token;
 		this.deviceRegId = deviceRegId;
 		this.bouncerId = bouncerId;
-
 		this.eventId = eventId;
 
 	}
@@ -178,93 +145,39 @@ public class CheckinRequest {
 	 * a non-UI thread.
 	 * 
 	 * @return the response from the server
-	 * @throws CheckinException
+	 * @throws ServerRequestException
 	 *             if the request cannot be carried out for any reason (e.g.
 	 *             network errors).
 	 */
-	// TODO implement exponential backoff on failure
-	public CheckinResponse send() throws CheckinException {
+	public CheckinResponse send() throws ServerRequestException {
 		// Format as JSON
-		String strRequest;
+		String requestBody;
 		try {
-			strRequest = getRequestString(this.token, this.deviceRegId,
+			requestBody = getRequestString(this.token, this.deviceRegId,
 					this.bouncerId, this.eventId);
 		} catch (JSONException e) {
 			// Wrap exception
-			throw new CheckinException("Error preparing request JSON", e);
+			throw new ServerRequestException("Error preparing request JSON", e);
 		}
 
-		Log.d(TAG, "Request body: " + strRequest);
-
-		URL url;
+		URL requestUrl;
 		try {
-			url = new URL(CHECKIN_REQUEST_URI);
+			requestUrl = new URL(REQUEST_URI);
 		} catch (MalformedURLException e) {
-			throw new CheckinException("Invalid URL: " + CHECKIN_REQUEST_URI, e);
+			throw new ServerRequestException("Invalid URL: "
+					+ REQUEST_URI, e);
 		}
 
-		byte[] requestBytes = strRequest.getBytes();
-		String strResponse = null;
-		HttpURLConnection conn = null;
-
-		try {
-			// Prepare request
-			conn = (HttpURLConnection) url.openConnection();
-			conn.setDoOutput(true);
-			conn.setUseCaches(false);
-			conn.setFixedLengthStreamingMode(requestBytes.length);
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-Type", MIMETYPE_JSON + ";charset="
-					+ REQUEST_ENCODING);
-
-			// Post the request
-			OutputStream out = conn.getOutputStream();
-			out.write(requestBytes);
-			out.close();
-
-			// Check the response code
-			int status = conn.getResponseCode();
-			if (status != HTTP_STATUS_OK) {
-				throw new IOException("POST failed with error code " + status);
-			}
-
-			InputStream responseStream = conn.getInputStream();
-
-			int contentLen;
-			if (conn.getContentLength() >= 0) {
-				contentLen = conn.getContentLength();
-			} else {
-				Log.w(TAG,
-						"Content length not specified in response header; using default value of "
-								+ DEFAULT_CONTENT_LENGTH);
-				contentLen = DEFAULT_CONTENT_LENGTH;
-			}
-
-			byte[] responseBytes = new byte[contentLen];
-			int numRead = responseStream.read(responseBytes, 0, contentLen);
-			if (numRead >= 0) {
-				strResponse = new String(responseBytes, 0, numRead,
-						RESPONSE_ENCODING);
-			}
-
-			responseStream.close();
-		} catch (Exception e) {
-			throw new CheckinException("Error sending request", e);
-		} finally {
-			if (conn != null) {
-				conn.disconnect();
-			}
-		}
-
-		Log.d(TAG, "Response body: " + strResponse);
+		// Send request
+		String responseBody = ServerRequest.send(requestUrl, requestBody);
 
 		// Parse JSON response
 		CheckinResponse checkinResponse;
 		try {
-			checkinResponse = getCheckinResponse(strResponse);
+			checkinResponse = getCheckinResponse(responseBody);
 		} catch (JSONException e) {
 			// Wrap exception
-			throw new CheckinException("Error parsing response JSON", e);
+			throw new ServerRequestException("Error parsing response JSON", e);
 		}
 
 		return checkinResponse;
