@@ -48,11 +48,19 @@
 		$model->store_json();
 	}
 	else if (isset($_REQUEST['send_gcm'])) {
-		if ()
-		loadModel();
-		$model = new model;
+		if ((isset($_REQUEST['submit']))&&($_REQUEST['submit']=='TRUE')) {
+			loadModel();
+			$model = new model;
 
-		$model->send_gcm_message($_REQUEST[]);
+			$model->send_gcm_message($_REQUEST['device_id']);
+		}
+		else {
+			loadView('gcm_test');
+
+			$view = new gcm_testPage;
+
+			$view->gen_page();
+		}
 	}
 	else {
 		loadModel();

@@ -23,7 +23,7 @@
 
 	// GCM Defaults
 	define('GCM_API_KEY', '');
-	define('GCM_SEND_URL', 'https://android.googleapis.com/gcm/send')
+	define('GCM_SEND_URL', 'https://android.googleapis.com/gcm/send');
 
 	// PHP Settings
 	define('DATE_FORMAT', 'ymd');
