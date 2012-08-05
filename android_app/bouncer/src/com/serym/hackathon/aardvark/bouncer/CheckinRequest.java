@@ -26,7 +26,7 @@ public class CheckinRequest {
 	/**
 	 * URI for check-in request.
 	 */
-	private static final String CHECKIN_REQUEST_URI = "http://hackathon.serym.com/?checkin";
+	private static final String CHECKIN_REQUEST_URI = "http://hackathon.serym.com/checkin";
 
 	/**
 	 * HTTP response code OK.
@@ -39,76 +39,138 @@ public class CheckinRequest {
 	private static final String MIMETYPE_JSON = "application/json";
 
 	/**
-	 * Encoding used for request message.
+	 * The content encoding used for request message.
 	 */
 	private static final String REQUEST_ENCODING = "UTF-8";
 
 	/**
-	 * Name of JSON bouncer id field.
+	 * The content length to assume if not specified in the response.
 	 */
-	private static final String JSON_BOUNCER_ID = "bouncer_id";
+	private static final int DEFAULT_CONTENT_LENGTH = 1024;
 
 	/**
-	 * Name of JSON device registration id field.
+	 * The content encoding used to read the response message.
 	 */
-	private static final String JSON_DEVICE_REG_ID = "device_registration_id";
+	private static final String RESPONSE_ENCODING = "UTF-8";
 
 	/**
-	 * Name of JSON event id field.
+	 * Name of JSON request token field.
 	 */
-	private static final String JSON_EVENT_ID = "event_id";
+	private static final String JSON_REQ_TOKEN = "token";
 
 	/**
-	 * Name of JSON user id field.
+	 * Name of JSON request device registration id field.
 	 */
-	private static final String JSON_USER_ID = "user_id";
+	private static final String JSON_REQ_DEVICE_REG_ID = "device_registration_id";
 
 	/**
-	 * Name of JSON server MAC field.
+	 * Name of JSON request event id field.
 	 */
-	private static final String JSON_MAC_SERVER = "mac_server";
+	private static final String JSON_REQ_EVENT_ID = "event_id";
 
 	/**
-	 * Name of JSON client MAC field.
+	 * Name of JSON request bouncer id field.
 	 */
-	private static final String JSON_MAC_CLIENT = "mac_client";
+	private static final String JSON_REQ_BOUNCER_ID = "bouncer_id";
 
-	private String bouncerId;
+	/**
+	 * Name of JSON response status code field.
+	 */
+	private static final String JSON_RESP_STATUS_CODE = "status_code";
 
+	/**
+	 * Name of JSON response user name field.
+	 */
+	private static final String JSON_RESP_USER_NAME = "user_name";
+
+	/**
+	 * Prefix of all guest codes.
+	 */
+	private static final String GUEST_CODE_PREFIX = "AARDVARK";
+
+	/**
+	 * Length of the token field in a guest code.
+	 */
+	private static final int GUEST_CODE_TOKENLEN = 32;
+
+	/**
+	 * Minimum length of a valid guest code.
+	 */
+	private static final int GUEST_CODE_MINLEN = GUEST_CODE_PREFIX.length()
+			+ GUEST_CODE_TOKENLEN + 1;
+
+	/**
+	 * The token for this request.
+	 */
+	private String token;
+
+	/**
+	 * The device registration id for this request.
+	 */
 	private String deviceRegId;
 
+	/**
+	 * The bouncer id for this request.
+	 */
+	private String bouncerId;
+
+	/**
+	 * The event id for this request.
+	 */
 	private String eventId;
 
-	private String userId;
+	/**
+	 * Parses a guest code and creates a corresponding CheckinRequest. If the
+	 * guest code is invalid, a CheckinException will be thrown.
+	 * 
+	 * @param qrCode
+	 *            contents of the guest QR code
+	 * @param bouncerId
+	 *            the bouncer id
+	 * @param eventId
+	 *            the event id
+	 * @return a corresponding CheckinRequest
+	 * @throws CheckinException
+	 *             if the guest code is invalid
+	 */
+	public static CheckinRequest createFromCode(String qrCode,
+			String bouncerId, String eventId) throws CheckinException {
 
-	private String macServer;
+		if (qrCode == null || !qrCode.startsWith(GUEST_CODE_PREFIX)
+				|| qrCode.length() < GUEST_CODE_MINLEN) {
+			throw new CheckinException("Invalid guest code: " + qrCode);
+		}
 
-	private String macClient;
+		String token = qrCode.substring(GUEST_CODE_PREFIX.length(),
+				GUEST_CODE_PREFIX.length() + GUEST_CODE_TOKENLEN);
+
+		String deviceRegId = qrCode.substring(GUEST_CODE_PREFIX.length()
+				+ GUEST_CODE_TOKENLEN);
+
+		return new CheckinRequest(token, deviceRegId, bouncerId, eventId);
+	}
 
 	/**
 	 * Creates a request with the given fields.
 	 * 
-	 * @param bouncerId
-	 *            bouncer id
+	 * @param token
+	 *            token
 	 * @param deviceRegId
 	 *            device registration id
+	 * @param bouncerId
+	 *            bouncer id
+	 * 
 	 * @param eventId
 	 *            event id
-	 * @param userId
-	 *            user id
-	 * @param macServer
-	 *            server MAC
-	 * @param macClient
-	 *            client MAC
 	 */
-	public CheckinRequest(String bouncerId, String deviceRegId, String eventId,
-			String userId, String macServer, String macClient) {
-		this.bouncerId = bouncerId;
+	public CheckinRequest(String token, String deviceRegId, String bouncerId,
+			String eventId) {
+		this.token = token;
 		this.deviceRegId = deviceRegId;
+		this.bouncerId = bouncerId;
+
 		this.eventId = eventId;
-		this.userId = userId;
-		this.macServer = macServer;
-		this.macClient = macClient;
+
 	}
 
 	/**
@@ -123,19 +185,14 @@ public class CheckinRequest {
 	// TODO implement exponential backoff on failure
 	public CheckinResponse send() throws CheckinException {
 		// Format as JSON
-		JSONObject jsonRequest = new JSONObject();
+		String strRequest;
 		try {
-			jsonRequest.put(JSON_BOUNCER_ID, this.bouncerId);
-			jsonRequest.put(JSON_DEVICE_REG_ID, this.deviceRegId);
-			jsonRequest.put(JSON_EVENT_ID, this.eventId);
-			jsonRequest.put(JSON_USER_ID, this.userId);
-			jsonRequest.put(JSON_MAC_SERVER, this.macServer);
-			jsonRequest.put(JSON_MAC_CLIENT, this.macClient);
+			strRequest = getRequestString(this.token, this.deviceRegId,
+					this.bouncerId, this.eventId);
 		} catch (JSONException e) {
 			// Wrap exception
 			throw new CheckinException("Error preparing request JSON", e);
 		}
-		String strRequest = jsonRequest.toString();
 
 		Log.d(TAG, "Request body: " + strRequest);
 
@@ -147,7 +204,7 @@ public class CheckinRequest {
 		}
 
 		byte[] requestBytes = strRequest.getBytes();
-		byte[] responseBytes = null;
+		String strResponse = null;
 		HttpURLConnection conn = null;
 
 		try {
@@ -172,8 +229,24 @@ public class CheckinRequest {
 			}
 
 			InputStream responseStream = conn.getInputStream();
-			responseBytes = new byte[conn.getContentLength()];
-			responseStream.read(responseBytes, 0, conn.getContentLength());
+
+			int contentLen;
+			if (conn.getContentLength() >= 0) {
+				contentLen = conn.getContentLength();
+			} else {
+				Log.w(TAG,
+						"Content length not specified in response header; using default value of "
+								+ DEFAULT_CONTENT_LENGTH);
+				contentLen = DEFAULT_CONTENT_LENGTH;
+			}
+
+			byte[] responseBytes = new byte[contentLen];
+			int numRead = responseStream.read(responseBytes, 0, contentLen);
+			if (numRead >= 0) {
+				strResponse = new String(responseBytes, 0, numRead,
+						RESPONSE_ENCODING);
+			}
+
 			responseStream.close();
 		} catch (Exception e) {
 			throw new CheckinException("Error sending request", e);
@@ -183,30 +256,89 @@ public class CheckinRequest {
 			}
 		}
 
-		String strResponse = new String(responseBytes);
-
 		Log.d(TAG, "Response body: " + strResponse);
 
-		if (strResponse.isEmpty()) {
-			throw new CheckinException("Empty response body");
-		}
-
-		JSONObject jsonResponse = null;
+		// Parse JSON response
+		CheckinResponse checkinResponse;
 		try {
-			jsonResponse = (JSONObject) (new JSONTokener(strResponse))
-					.nextValue();
+			checkinResponse = getCheckinResponse(strResponse);
 		} catch (JSONException e) {
 			// Wrap exception
 			throw new CheckinException("Error parsing response JSON", e);
 		}
 
-		// TODO
-		// Once we get response format, construct CheckinResponse
-		// from JSON fields.
+		return checkinResponse;
+	}
 
-		CheckinResponse response = new CheckinResponse(strResponse);
+	/**
+	 * Returns a JSON request string corresponding to the given fields.
+	 * 
+	 * @param token
+	 *            the token
+	 * @param deviceRegId
+	 *            the device registration id
+	 * @param bouncerId
+	 *            the bouncer id
+	 * @param eventId
+	 *            the event id
+	 * @return a corresponding JSON request string
+	 * @throws JSONException
+	 *             if there is a formatting error
+	 */
+	private static String getRequestString(String token, String deviceRegId,
+			String bouncerId, String eventId) throws JSONException {
 
-		return response;
+		JSONObject jsonRequest = new JSONObject();
+
+		jsonRequest.put(JSON_REQ_TOKEN, token);
+		jsonRequest.put(JSON_REQ_DEVICE_REG_ID, deviceRegId);
+		jsonRequest.put(JSON_REQ_EVENT_ID, eventId);
+		jsonRequest.put(JSON_REQ_BOUNCER_ID, bouncerId);
+
+		return jsonRequest.toString();
+	}
+
+	/**
+	 * Parses the JSON response and returns the corresponding CheckinResponse.
+	 * 
+	 * @param response
+	 *            the response string from the server
+	 * @return the corresponding CheckinResponse
+	 * @throws JSONException
+	 *             if the response cannot be parsed
+	 */
+	private static CheckinResponse getCheckinResponse(String response)
+			throws JSONException {
+		if (response == null || response.isEmpty()) {
+			throw new JSONException("Empty response body");
+		}
+
+		// Parse as JSONObject
+		JSONObject jsonResponse;
+		Object nextValue = (new JSONTokener(response)).nextValue();
+		if (nextValue instanceof JSONObject) {
+			jsonResponse = (JSONObject) nextValue;
+		} else {
+			throw new JSONException("Expected JSONObject response but got "
+					+ nextValue.getClass().getName());
+		}
+
+		// Get status code and convert to integer
+		String stringCode = jsonResponse.getString(JSON_RESP_STATUS_CODE);
+		int statusCode;
+		try {
+			statusCode = Integer.valueOf(stringCode);
+		} catch (NumberFormatException e) {
+			throw new JSONException("Non-numerical status code: " + stringCode);
+		}
+
+		// Get user name if exists
+		String userName = null;
+		if (jsonResponse.has(JSON_RESP_USER_NAME)) {
+			userName = jsonResponse.optString(JSON_RESP_USER_NAME);
+		}
+
+		return new CheckinResponse(statusCode, userName);
 	}
 
 }

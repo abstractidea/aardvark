@@ -6,17 +6,80 @@ package com.serym.hackathon.aardvark.bouncer;
  */
 public class CheckinResponse {
 
-	// TODO should have individual fields once we decide on them
-	private String message;
+	/**
+	 * The response code.
+	 */
+	private CheckinResponseCode responseCode;
 
-	// TODO should have individual fields once we decide on them
-	public CheckinResponse(String message) {
-		this.message = message;
+	/**
+	 * The user name. May be null if not specified in response.
+	 */
+	private String userName;
+
+	/**
+	 * Creates a CheckinResponse with the given response code and no user name.
+	 * 
+	 * @param responseCode
+	 *            the response code
+	 */
+	public CheckinResponse(int responseCode) {
+		this.responseCode = CheckinResponseCode.fromInt(responseCode);
+		this.userName = null;
 	}
 
-	// TODO should have individual fields once we decide on them
-	public String getMessage() {
-		return this.message;
+	/**
+	 * Creates a CheckinResponse with the given response code and no user name.
+	 * 
+	 * @param responseCode
+	 *            the response code
+	 */
+	public CheckinResponse(CheckinResponseCode responseCode) {
+		this.responseCode = responseCode;
+		this.userName = null;
+	}
+
+	/**
+	 * Creates a CheckinResponse with the given response code and user name.
+	 * 
+	 * @param responseCode
+	 *            the response code
+	 * @param userName
+	 *            the user name
+	 */
+	public CheckinResponse(int responseCode, String userName) {
+		this.responseCode = CheckinResponseCode.fromInt(responseCode);
+		this.userName = userName;
+	}
+
+	/**
+	 * Creates a CheckinResponse with the given response code and user name.
+	 * 
+	 * @param responseCode
+	 *            the response code
+	 * @param userName
+	 *            the user name
+	 */
+	public CheckinResponse(CheckinResponseCode responseCode, String userName) {
+		this.responseCode = responseCode;
+		this.userName = userName;
+	}
+
+	/**
+	 * Returns the response code.
+	 * 
+	 * @return the response code
+	 */
+	public CheckinResponseCode getResponseCode() {
+		return this.responseCode;
+	}
+
+	/**
+	 * Returns the user name. May be null if not specified in response.
+	 * 
+	 * @return the user name if present, or else null
+	 */
+	public String getUserName() {
+		return this.userName;
 	}
 
 }
