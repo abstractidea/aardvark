@@ -120,6 +120,7 @@ public class CheckinRequest {
 	 *             if the request cannot be carried out for any reason (e.g.
 	 *             network errors).
 	 */
+	// TODO implement exponential backoff on failure
 	public CheckinResponse send() throws CheckinException {
 		// Format as JSON
 		JSONObject jsonRequest = new JSONObject();
@@ -200,6 +201,8 @@ public class CheckinRequest {
 		}
 
 		// TODO
+		// Once we get response format, construct CheckinResponse
+		// from JSON fields.
 
 		CheckinResponse response = new CheckinResponse(strResponse);
 

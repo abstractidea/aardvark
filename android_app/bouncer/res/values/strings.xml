@@ -4,6 +4,8 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_bouncer">BouncerActivity</string>
     
+    <string name="logo_content_descr">Aardvark</string>
+    
     <string name="scan_btn">Scan Guest Code</string>
     <string name="test_request_btn">Send Test Request</string>
 

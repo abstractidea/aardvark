@@ -1,23 +1,31 @@
 package com.serym.hackathon.aardvark.bouncer;
 
 import com.google.zxing.client.android.Intents;
+import com.serym.hackathon.aardvark.BarcodeAppDownloadDialog;
 
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
+/**
+ * BouncerActivity is the primary activity for the Aardvark Bouncer app. It
+ * allows bouncers to scan guest codes.
+ */
 public class BouncerActivity extends Activity {
+
+	/**
+	 * Tag for LogCat.
+	 */
+	private static final String TAG = "AARDVARK-BOUNCER";
 
 	/**
 	 * Request code for Barcode Scanner scan intent.
@@ -25,47 +33,80 @@ public class BouncerActivity extends Activity {
 	private static final int SCAN_REQUESTCODE = 0x478;
 
 	/**
-	 * Tag for LogCat.
+	 * The name of the CharSequence in the icicle to sore the text of
+	 * statusViewText.
 	 */
-	private static final String TAG = "AARDVARK-BOUNCER";
+	private static final String ICICLE_STATUSTEXTVIEW_TEXT = "statusTextView_text";
 
+	/**
+	 * The status TextView.
+	 */
 	private TextView statusTextView = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_bouncer);
 
+		// Get view elements by id
 		statusTextView = (TextView) findViewById(R.id.statusTextView);
-
 		Button scanButton = (Button) findViewById(R.id.scanButton);
 		Button testRequestButton = (Button) findViewById(R.id.testRequestButton);
 
-		scanButton.setOnClickListener(scanButtonListener);
-		testRequestButton.setOnClickListener(testRequestButtonListener);
+		// Setup listeners
+		scanButton.setOnClickListener(new ScanButtonListener());
+		testRequestButton.setOnClickListener(new TestRequestButtonListener());
 	}
 
+	@Override
+	public void onSaveInstanceState(Bundle icicle) {
+		super.onSaveInstanceState(icicle);
+
+		icicle.putCharSequence(ICICLE_STATUSTEXTVIEW_TEXT,
+				statusTextView.getText());
+	}
+
+	@Override
+	public void onRestoreInstanceState(Bundle icicle) {
+		super.onRestoreInstanceState(icicle);
+
+		// Restore statusTextView text
+		CharSequence statusTextView_text = icicle
+				.getCharSequence(ICICLE_STATUSTEXTVIEW_TEXT);
+		if (statusTextView_text != null) {
+			statusTextView.setText(statusTextView_text);
+		}
+	}
+
+	// XXX This was auto-generated. Do we need it?
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_bouncer, menu);
 		return true;
 	}
 
+	/**
+	 * Handles the Barcode Scanner scan intent result.
+	 */
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		if (resultCode == Activity.RESULT_OK && requestCode == SCAN_REQUESTCODE) {
+
 			String result = intent.getStringExtra(Intents.Scan.RESULT);
 
-			Log.d(TAG, "Read QR result: " + result);
+			Log.d(TAG, "Guest code contents: " + result);
 
-			// Toast.makeText(this.getApplicationContext(), result,
-			// Toast.LENGTH_LONG).show();
-
+			// TODO For now, simply display the result
 			statusTextView.setText(result);
 		}
 	}
 
-	private OnClickListener scanButtonListener = new OnClickListener() {
+	/**
+	 * Listener class for the scan guest code button.
+	 */
+	private class ScanButtonListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
 			Intent intent = new Intent(Intents.Scan.ACTION);
@@ -83,12 +124,15 @@ public class BouncerActivity extends Activity {
 				BouncerActivity.this.startActivityForResult(intent,
 						BouncerActivity.SCAN_REQUESTCODE);
 			} catch (ActivityNotFoundException e) {
-				BouncerActivity.this.showDownloadDialog();
+				(new BarcodeAppDownloadDialog(BouncerActivity.this)).show();
 			}
 		}
 	};
 
-	private OnClickListener testRequestButtonListener = new OnClickListener() {
+	/**
+	 * Listener class for the test request button.
+	 */
+	private class TestRequestButtonListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
 			final CheckinRequest request = new CheckinRequest("bouncer123",
@@ -99,39 +143,15 @@ public class BouncerActivity extends Activity {
 		}
 	};
 
-	// From com.google.zxing.integration.android.IntentIntegrator
-	private AlertDialog showDownloadDialog() {
-		AlertDialog.Builder downloadDialog = new AlertDialog.Builder(this);
-		downloadDialog.setTitle("Install Barcode Scanner?");
-		downloadDialog
-				.setMessage("This application requires Barcode Scanner. Would you like to install it?");
-		downloadDialog.setPositiveButton("Yes",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialogInterface, int i) {
-						Uri uri = Uri
-								.parse("market://details?id=com.google.zxing.client.android");
-						Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-						try {
-							BouncerActivity.this.startActivity(intent);
-						} catch (ActivityNotFoundException anfe) {
-							// Hmm, market is not installed
-							Log.w(TAG,
-									"Android Market is not installed; cannot install Barcode Scanner");
-						}
-					}
-				});
-		downloadDialog.setNegativeButton("No",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialogInterface, int i) {
-					}
-				});
-		return downloadDialog.show();
-	}
-
+	/**
+	 * Task class for sending a CheckinRequest and handling the CheckinResponse.
+	 */
 	private class SendCheckinRequestTask extends
 			AsyncTask<CheckinRequest, Object, CheckinResponse> {
+		/**
+		 * The exception, if any, that occurred while executing this task.
+		 * Otherwise, null.
+		 */
 		private Exception executeException = null;
 
 		@Override
