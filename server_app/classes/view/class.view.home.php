@@ -2,14 +2,11 @@
 	loadView();
 
 	class homePage extends page {
-		public function gen_content($json='') {
+		public function gen_content($auth_result='') {
 			echo '
-				<h3 id="pageTitle">Project Aarvark JSON Parsing Test</h3>
-				<br />
+				<h3 id="pageTitle">Project Aardvark JSON Parsing Test</h3>
+				<div>'.$auth_result->message.'</div>
 			';
-			foreach ($json as $key=>$value) {
-				echo $key.'<br />'.$value.'<br /><br />';
-			}
 		}
 	}
 ?>

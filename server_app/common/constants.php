@@ -18,6 +18,12 @@
 	define('DB_HOST', 'localhost');
 	define('DB_USER', 'palenous_hackath');
 	define('DB_PASS', 'KFc;KWE4{nN[');
+	define('DB_TABLE_USERS', 'users');
+	define('DB_TABLE_USERS_ROLES', 'users_roles');
+
+	// GCM Defaults
+	define('GCM_API_KEY', '');
+	define('GCM_SEND_URL', 'https://android.googleapis.com/gcm/send');
 
 	// PHP Settings
 	define('DATE_FORMAT', 'ymd');
@@ -32,10 +38,10 @@
 	session_start();
 	define('SESSION_ID_LENGTH', 16);
 	define('LOGIN_SLEEP_TIME', 3);
-	define('USERNAME_WHITELIST', '-_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+	define('USERNAME_WHITELIST', '@.-_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 	define('USERNAME_MIN_LENGTH', 8);
 	define('USERNAME_MAX_LENGTH', 64);
-	define('PASSWORD_WHITELIST', '!@#$%^&*()_-+=0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+	define('PASSWORD_WHITELIST', '!@#$%^&*()._-+=0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 	define('PASSWORD_SALT', 'B6t+bAy5@hfucTnvnW7Xt308#(rEFC=m');
 	define('PASSWORD_MIN_LENGTH', 8);
 	define('PASSWORD_MAX_LENGTH', 512);

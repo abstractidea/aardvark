@@ -24,6 +24,7 @@
 									<li><a href="'.WEB_ROOT.'#">Nothing</a></li>
 									<li><a href="'.WEB_ROOT.'#">Nothing</a></li>
 									<li><a href="'.WEB_ROOT.'#">Nothing</a></li>
+									'.loadSettings().'
 								</ul>
 							</div>
 							<div id="content">
