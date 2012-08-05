@@ -6,21 +6,23 @@
 			echo '
 				<h3 id="pageTitle">Login</h3>
 			';
-			switch($_SESSION['form_error']) {
-				case 'username_characters':
-					echo '<p class="error">Email has not allowed characters</p>';
-					break;
-				case 'password_characters':
-					echo '<p class="error">Password has not allowed characters</p>';
-					break;
-				case 'password_length':
-					echo '<p class="error">Password does not meet length requirements</p>';
-					break;
-				case 'unknown_error':
-					echo '<p class="error">Unknown Error</p>';
-					break;
-				default:
-					break;
+			for ($i=0; $i<count($error); ++$i) {
+				switch($error[$i]) {
+					case 'username_characters':
+						echo '<p class="error">Email has not allowed characters</p>';
+						break;
+					case 'password_characters':
+						echo '<p class="error">Password has not allowed characters</p>';
+						break;
+					case 'password_length':
+						echo '<p class="error">Password does not meet length requirements</p>';
+						break;
+					case 'unknown_error':
+						echo '<p class="error">Unknown Error</p>';
+						break;
+					default:
+						break;
+				}
 			}
 			echo '
 				<form action="'.WEB_ROOT.'login" method=POST>

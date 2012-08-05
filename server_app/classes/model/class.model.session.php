@@ -20,12 +20,12 @@
 					continue;
 				}
 				else {
-					$_SESSION['form_error'] = 'username_characters';
+					$this->form_error[] = 'username_characters';
 					return FALSE;
 				}
 			}
 			if ((strstr($username, '__'))||(strstr($username, '--'))||(strstr($username, '_-'))||(strstr($username, '-_'))) {
-				$_SESSION['form_error'] = 'username_characters';
+				$this->form_error[] = 'username_characters';
 				return FALSE;
 			}
 			else {
@@ -35,7 +35,7 @@
 		public function password_verify($password=FALSE) {
 			if ($password==NULL) {
 				log("NULL Password Received: ".$password);
-				$_SESSION['form_error'] = 'password_characters';
+				$this->form_error[] = 'password_characters';
 
 				return FALSE;
 			}
@@ -45,7 +45,7 @@
 						continue;
 					}
 					else {
-						$_SESSION['form_error'] = 'password_characters';
+						$this->form_error[] = 'password_characters';
 						return FALSE;
 					}
 				}
@@ -53,7 +53,7 @@
 				return TRUE;
 			}
 			else {
-				$_SESSION['form_error'] = 'password_length';
+				$this->form_error[] = 'password_length';
 				return FALSE;
 			}
 			
@@ -81,7 +81,7 @@
 				$queryResult->close();
 
 				if ($username==$object->username) {
-					$_SESSION['form_error'] = 'username_taken';
+					$this->form_error[] = 'username_taken';
 					return FALSE;
 				}
 				else {
@@ -94,7 +94,8 @@
 				$db->close();
 			}
 			else {
-				return FALSE;
+				$this->form_error[] = 'unknown_error';
+				return $this->form_error;
 			}
 		}
 		public function authenticate($username='', $password='') {
