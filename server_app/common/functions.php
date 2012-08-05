@@ -30,4 +30,41 @@
 	function loadJS($name='') {
 		return '<script type="text/javascript" src="'.RESOURCES.'js/'.$name.'.js"></script>';
 	}
+	function loadSettings() {
+		loadModel('session');
+		$model = new session;
+		if ($model->session_verify()) {
+			return '
+				<li><a href="'.WEB_ROOT.'logout">Logout</a></li>
+			';
+		}
+		else {
+			return '
+				<li><a href="'.WEB_ROOT.'login">Login</a></li>
+			';
+		}
+	}
+	function authorized($allowedRole='') {
+		loadModel('session');
+		$model = new session;
+		if ($model->session_verify()) {
+			if (isset($_SESSION['ROLE'])) {
+				if ($_SESSION['ROLE']=='') {
+					return FALSE;
+				}
+				else if ($_SESSION['ROLE']==$allowedRole) {
+					return TRUE;
+				}
+				else {
+					return FALSE;
+				}
+			}
+			else {
+				return FALSE;
+			}
+		}
+		else {
+			return FALSE;
+		}
+	}
 ?>
