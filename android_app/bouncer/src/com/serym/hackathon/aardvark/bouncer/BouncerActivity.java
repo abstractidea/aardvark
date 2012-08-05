@@ -2,6 +2,7 @@ package com.serym.hackathon.aardvark.bouncer;
 
 import com.google.zxing.client.android.Intents;
 import com.serym.hackathon.aardvark.BarcodeAppDownloadDialog;
+import com.serym.hackathon.aardvark.ServerRequestException;
 import com.serym.hackathon.aardvark.SoundManager;
 import com.serym.hackathon.aardvark.SoundType;
 

@@ -1,4 +1,4 @@
-package com.serym.hackathon.aardvark.bouncer;
+package com.serym.hackathon.aardvark;
 
 /**
  * ServerRequestException represents an error that occurred while sending a

@@ -1,4 +1,4 @@
-package com.serym.hackathon.aardvark.bouncer;
+package com.serym.hackathon.aardvark;
 
 /**
  * LoginResponseCode represents the possible status codes returned by the

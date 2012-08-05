@@ -1,4 +1,4 @@
-package com.serym.hackathon.aardvark.bouncer;
+package com.serym.hackathon.aardvark;
 
 /**
  * LoginResponse represents the response from the server after a

@@ -1,4 +1,4 @@
-package com.serym.hackathon.aardvark.bouncer;
+package com.serym.hackathon.aardvark;
 
 import java.net.MalformedURLException;
 import java.net.URL;

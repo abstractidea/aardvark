@@ -1,5 +1,8 @@
 package com.serym.hackathon.aardvark.bouncer;
 
+import com.serym.hackathon.aardvark.ServerRequest;
+import com.serym.hackathon.aardvark.ServerRequestException;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -164,8 +167,7 @@ public class CheckinRequest {
 		try {
 			requestUrl = new URL(REQUEST_URI);
 		} catch (MalformedURLException e) {
-			throw new ServerRequestException("Invalid URL: "
-					+ REQUEST_URI, e);
+			throw new ServerRequestException("Invalid URL: " + REQUEST_URI, e);
 		}
 
 		// Send request
