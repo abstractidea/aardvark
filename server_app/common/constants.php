@@ -14,16 +14,16 @@
 	define('RESOURCES', WEB_ROOT.'resources/');
 
 	// Database
-	define('DB', 'palenous_hackathon_aardvark');
-	define('DB_HOST', 'localhost');
-	define('DB_USER', 'palenous_hackath');
-	define('DB_PASS', 'KFc;KWE4{nN[');
-	define('DB_TABLE_USERS', 'users');
-	define('DB_TABLE_USERS_ROLES', 'users_roles');
+	define('DB', '');
+	define('DB_HOST', '');
+	define('DB_USER', '');
+	define('DB_PASS', '');
+	define('DB_TABLE_USERS', '');
+	define('DB_TABLE_USERS_ROLES', '');
 	define('TOKEN_LENGTH', 32);
 
 	// GCM Defaults
-	define('GCM_API_KEY', 'AIzaSyBZYkqjQS-E717KBl5NFYbXb6g9YZI7kdk');
+	define('GCM_API_KEY', '');
 	define('GCM_SEND_URL', 'https://android.googleapis.com/gcm/send');
 
 	// PHP Settings
@@ -43,7 +43,7 @@
 	define('USERNAME_MIN_LENGTH', 8);
 	define('USERNAME_MAX_LENGTH', 64);
 	define('PASSWORD_WHITELIST', '!@#$%^&*()._-+=0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
-	define('PASSWORD_SALT', 'B6t+bAy5@hfucTnvnW7Xt308#(rEFC=m');
+	define('PASSWORD_SALT', '');
 	define('PASSWORD_MIN_LENGTH', 8);
 	define('PASSWORD_MAX_LENGTH', 512);
 ?>
