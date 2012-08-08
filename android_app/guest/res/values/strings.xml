@@ -1,16 +1,17 @@
 <resources>
 
+    <string name="hello_world">Hello, World!</string>
     <string name="app_name">AardvarkGuest</string>
+
     <!-- Login Screen -->
-	<string name="login_prompt">Please Login</string>
-	<string name="username">Username:</string>
-	<string name="password">Password:</string>
-	<string name="login_button">Login</string>
-	<string name="anony_button">Anonymous</string>
+    <string name="login_prompt">Please Login</string>
+    <string name="username">Username:</string>
+    <string name="password">Password:</string>
+    <string name="login_button">Login</string>
+    <string name="anony_button">Anonymous</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_guest">GuestActivity</string>
     <string name="hello_world">hello world</string>
-    
     <string name="generate_btn">Generate</string>
     <string name="scan_prompt_msg">Scan a Guest Code</string>
 
